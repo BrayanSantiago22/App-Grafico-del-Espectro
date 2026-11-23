@@ -1,111 +1,72 @@
 # FinData — Financial Data Integration & Certification Platform
 
-FinData es un proyecto de portafolio que simula un proceso de integración bancaria **Legacy → Moderno**. Reúne exploración de fuentes, mapeo de esquemas, transformación con PySpark/Spark SQL, controles de calidad, conciliación financiera y generación de evidencia de certificación.
+FinData es un proyecto de portafolio que simula integración bancaria Legacy → Moderno. Reúne exploración de fuentes, mapeo de esquemas, transformación con PySpark/Spark SQL, controles de calidad, conciliación financiera y evidencia de certificación.
 
-> **Datos ficticios:** todos los nombres, documentos, cuentas y movimientos son sintéticos. No se utiliza información real de clientes ni de entidades financieras.
+> **Datos ficticios:** clientes, documentos, cuentas y movimientos son sintéticos. No se utiliza información real ni datos de entidades financieras.
 
 ## Demo pública
+URL esperada: https://brayansantiago22.github.io/App-Grafico-del-Espectro/
 
-La demo se publica mediante GitHub Pages después de que el workflow `FinData · Test Spark SQL and deploy demo` complete correctamente. La URL esperada del sitio de este repositorio es:
-
-`https://brayansantiago22.github.io/App-Grafico-del-Espectro/`
-
-Si Pages todavía no está habilitado o el workflow no ha terminado, consulta la pestaña **Actions** del repositorio y el estado del despliegue.
+El sitio queda disponible después de que el workflow termine correctamente. Si Pages no está habilitado, selecciona GitHub Actions en Settings → Pages → Build and deployment → Source.
 
 ## Capacidades
-
-- Exploración de cuatro fuentes CSV y perfilamiento básico.
-- Carga local de CSV desde el navegador.
-- Diccionario de correspondencias Legacy → Moderno.
-- Transformación de cuentas con PySpark y Spark SQL.
-- 18 reglas demostrativas de calidad e integridad.
-- Conciliación de conteos, llaves y saldos.
-- Reporte JSON de ejecución Spark y exportación de hallazgos CSV.
-- API FastAPI para ejecutar el pipeline Spark localmente.
-- CI con ejecución real de Spark SQL, pruebas Python y publicación de la interfaz.
-
-## Arquitectura
-
-```text
-findata/
-├── src/                       # Lógica de interfaz en TypeScript
-├── site/                      # Sitio estático y reporte Spark generado
-├── data/                      # CSV sintéticos Legacy y Moderno
-├── backend/app/               # API FastAPI y pipeline PySpark
-├── backend/tests/             # Pruebas del pipeline
-├── spark/                     # CLI, SQL y generador de datos a escala
-├── sql/                       # DDL PostgreSQL y consultas analíticas
-├── docs/                      # Arquitectura, diccionario y guía de entrevista
-├── Dockerfile.web
-├── docker-compose.yml
-└── tsconfig.json
-```
+- Exploración de tres fuentes CSV: clientes, cuentas y transacciones.
+- Perfilamiento local en navegador de CSV cargados (sin transmitirlos).
+- Diccionario de correspondencias Legacy → modelo moderno.
+- Transformación real mediante PySpark y Spark SQL.
+- 12 reglas demostrativas de calidad e integridad.
+- Conciliación de conteos y saldos entre origen y modelo normalizado.
+- Reporte JSON y exportación de hallazgos CSV.
+- API FastAPI para ejecutar Spark localmente.
+- CI con Spark, pruebas Python, compilación TypeScript y GitHub Pages.
 
 ## Ejecución local con Docker
+Requisitos: Docker Desktop con Compose y 4 GB de memoria disponibles.
 
-Requisitos: Docker Desktop con Docker Compose y al menos 4 GB de memoria disponibles.
+Desde la carpeta findata:
 
-```bash
-docker compose up --build
-```
+    docker compose up --build
 
-- Interfaz: http://localhost:8080
-- API: http://localhost:8000/api/health
-- Documentación OpenAPI: http://localhost:8000/docs
+Interfaz: http://localhost:8080  
+API: http://localhost:8000/api/health  
+OpenAPI: http://localhost:8000/docs
 
-La API ejecuta Spark en modo local `local[2]`. La interfaz pública es estática y consume el reporte producido por Spark en el workflow de GitHub Actions. No se expone una API pública sin autenticación.
+En la interfaz local pulsa “Ejecutar Spark local”. La API ejecuta Spark local[2] y devuelve un reporte nuevo.
 
-## Ejecución manual del pipeline
+## Ejecución manual
+Requisitos: Python 3.11 y Java 17.
 
-Requisitos: Python 3.11, Java 17 y dependencias de `backend/requirements.txt`.
+    python -m pip install -r backend/requirements.txt
+    python spark/generate_dataset.py --output data
+    python spark/run_pipeline.py --data-dir data --output site/spark-results.json
+    PYTHONPATH=. python -m pytest backend/tests -q
 
-```bash
-python -m pip install -r backend/requirements.txt
-FINDATA_DATA_DIR=./data python spark/run_pipeline.py --output site/spark-results.json
-PYTHONPATH=. FINDATA_DATA_DIR=./data pytest backend/tests -q
-```
+Generar lote limpio:
 
-## Prueba con más volumen
+    python spark/generate_dataset.py --clean --output data-clean
+    python spark/run_pipeline.py --data-dir data-clean --output site/clean-report.json
 
-Genera un conjunto sintético con un millón de transacciones y ejecuta Spark sobre ese directorio:
+Generar un millón de transacciones sintéticas:
 
-```bash
-python spark/generate_dataset.py --transactions 1000000 --output data/generated
-FINDATA_DATA_DIR=./data/generated python spark/run_pipeline.py --data-dir ./data/generated --output ./site/spark-results-large.json
-```
+    python spark/generate_dataset.py --transactions 1000000 --output data-large
+    python spark/run_pipeline.py --data-dir data-large --output site/large-report.json
 
-El generador crea registros reproducibles con una semilla fija. El tamaño real de prueba dependerá de la memoria, CPU y almacenamiento disponibles.
+## CI/CD
+El workflow instala Java 17 y Python 3.11, genera fixtures deterministas, ejecuta PySpark/Spark SQL, ejecuta pruebas, compila TypeScript y publica la demo en GitHub Pages.
 
-## Automatización CI/CD
-
-El workflow `.github/workflows/findata-pages.yml` se activa al recibir cambios en la rama `findata-mvp`. Ejecuta:
-
-1. Configuración de Java 17 y Python 3.11.
-2. Instalación de PySpark y dependencias.
-3. Ejecución del pipeline Spark SQL y generación de `site/spark-results.json`.
-4. Pruebas automatizadas con pytest.
-5. Compilación TypeScript.
-6. Publicación de la interfaz en GitHub Pages.
-
-## Modelo de datos y consultas
-
-- `sql/schema.sql`: modelo relacional destino en PostgreSQL.
-- `sql/analysis_queries.sql`: CTE, JOIN, agregaciones y funciones de ventana.
-- `spark/queries.sql`: consultas Spark SQL para profiling, integridad y conciliación.
-- `docs/data-dictionary.md`: definición de los campos y anomalías intencionales.
+## Modelo y documentación
+- sql/schema.sql: modelo relacional PostgreSQL.
+- sql/analysis_queries.sql: CTE, JOIN, agregaciones y ventanas.
+- spark/queries.sql: consultas Spark SQL.
+- docs/data-dictionary.md: campos, equivalencias y anomalías.
+- docs/architecture.md: arquitectura y decisiones.
+- docs/interview-guide.md: recorrido de demo y preparación técnica.
 
 ## Alcance y limitaciones
+- Spark corre en modo local local[2] en CI y Docker; no equivale a un clúster distribuido productivo.
+- GitHub Pages sirve una demo estática con el reporte generado por Spark durante CI; no expone API pública ni clúster.
+- El perfilador de CSV del navegador es local; el pipeline Spark utiliza las tres fuentes de muestra.
+- No hay conexión a BBVA, Datum, Data Explora ni Data Contigo; se simulan estructuras financieras genéricas.
+- Producción requeriría autenticación, autorización, cifrado, secretos, gobierno de datos y observabilidad.
 
-- Spark corre en modo local en CI y en Docker. Esto demuestra ejecución real del motor Spark SQL, pero **no equivale a operar un clúster distribuido productivo**.
-- La interfaz pública es una demo estática con un resultado Spark generado durante CI. La API interactiva PySpark se ejecuta localmente.
-- No se incluye conexión a BBVA, Datum, Data Explora ni Data Contigo. Se simulan estructuras genéricas de productos financieros.
-- El conjunto pequeño permite demostrar las reglas; el generador sirve para ensayos de volumen.
-- Para producción se necesitarían autenticación, autorización, cifrado, gestión de secretos, observabilidad, controles de acceso y gobierno formal de datos.
-
-## Presentación del proyecto
-
-Consulta [`docs/interview-guide.md`](docs/interview-guide.md) para el recorrido de demostración, presentación de 90 segundos y preguntas técnicas. Consulta [`docs/architecture.md`](docs/architecture.md) para la arquitectura y decisiones técnicas.
-
-## Licencia
-
-MIT. Ver [`LICENSE`](LICENSE).
+Licencia: MIT.

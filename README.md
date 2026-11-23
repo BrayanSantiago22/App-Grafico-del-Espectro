@@ -1,16 +1,17 @@
 # App-Grafico-del-Espectro
 
-Repositorio original de una solución de software para dispositivos móviles que permite graficar tres señales en el ERE a partir de parámetros como temperatura, ancho de banda, potencia y frecuencia.
+Repositorio original de una solución móvil para graficar tres señales en el ERE a partir de temperatura, ancho de banda, potencia y frecuencia.
 
 ---
 
 # FinData — Financial Data Integration & Certification Platform
 
-Esta rama incorpora un proyecto independiente de ingeniería de datos en el directorio [`findata/`](findata/README.md). FinData simula la integración de fuentes bancarias Legacy con un modelo moderno, usando SQL, Python, PySpark y Spark SQL para explorar, mapear, transformar, validar y certificar información.
+La rama findata-mvp incorpora un proyecto independiente de ingeniería de datos en el directorio findata/. Simula la integración de fuentes bancarias Legacy con un modelo moderno mediante SQL, Python, PySpark y Spark SQL.
 
-- **Documentación del proyecto:** [`findata/README.md`](findata/README.md)
-- **Arquitectura:** [`findata/docs/architecture.md`](findata/docs/architecture.md)
-- **Guía de entrevista:** [`findata/docs/interview-guide.md`](findata/docs/interview-guide.md)
-- **Demo web:** [Abrir FinData](https://brayansantiago22.github.io/App-Grafico-del-Espectro/)
+- Proyecto: [findata/README.md](findata/README.md)
+- Arquitectura: [findata/docs/architecture.md](findata/docs/architecture.md)
+- Diccionario: [findata/docs/data-dictionary.md](findata/docs/data-dictionary.md)
+- Guía de entrevista: [findata/docs/interview-guide.md](findata/docs/interview-guide.md)
+- Demo web: https://brayansantiago22.github.io/App-Grafico-del-Espectro/
 
-Todos los datos de FinData son sintéticos y se utilizan únicamente con fines demostrativos.
+Todos los datos de FinData son sintéticos y demostrativos.
