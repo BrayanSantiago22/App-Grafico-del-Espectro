@@ -1,3 +1,4 @@
+export {};
 type View = "dashboard" | "sources" | "mapping" | "quality" | "reconciliation" | "certification";
 type SourceSummary = {name:string;entity:string;rows:number;columns:number;fields:string[]};
 type Mapping = {source:string;target:string;entity:string;transformation:string};
