@@ -2,7 +2,7 @@
 import json, os
 from pathlib import Path
 import pytest
-from app.pipeline import run_pipeline
+from backend.app.pipeline import run_pipeline
 
 @pytest.fixture(scope="module")
 def report(tmp_path_factory):
