@@ -1,4 +1,4 @@
-name: FinData · Test Spark SQL and deploy demo
+name: FinData - Spark SQL validation and GitHub Pages deployment
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
 
 concurrency:
   group: findata-pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   validate-and-build:
@@ -35,22 +35,25 @@ jobs:
           cache: pip
           cache-dependency-path: findata/backend/requirements.txt
       - name: Install Python dependencies
-        run: python -m pip install -r findata/backend/requirements.txt
-      - name: Run PySpark SQL pipeline
+        run: python -m pip install --upgrade pip && python -m pip install -r findata/backend/requirements.txt
+      - name: Generate deterministic synthetic banking data
+        run: python findata/spark/generate_dataset.py --output findata/data
+      - name: Run PySpark and Spark SQL pipeline
         env:
           FINDATA_DATA_DIR: findata/data
           SPARK_MASTER: local[2]
         run: python findata/spark/run_pipeline.py --data-dir findata/data --output findata/site/spark-results.json
-      - name: Run backend tests
+      - name: Run backend integration tests
         env:
           FINDATA_DATA_DIR: findata/data
           SPARK_MASTER: local[2]
-        run: PYTHONPATH=findata pytest findata/backend/tests -q
+          PYTHONPATH: findata
+        run: python -m pytest findata/backend/tests -q
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Compile TypeScript
+      - name: Compile strict TypeScript
         run: |
           npm install --global typescript@5.7.3
           tsc -p findata/tsconfig.json
@@ -59,22 +62,22 @@ jobs:
           mkdir -p _site/data
           cp -R findata/site/. _site/
           cp -R findata/data/. _site/data/
+          test -s _site/index.html
+          test -s _site/app.js
+          test -s _site/spark-results.json
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: _site
-
   deploy:
     needs: validate-and-build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: \${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Enable and configure GitHub Pages
+      - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
