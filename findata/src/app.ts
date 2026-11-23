@@ -59,7 +59,7 @@ function dashboard():string{
   '<div class="pipe-step"><div class="pipe-num">04 / CONTROL</div><div class="pipe-title">Certificación</div><div class="pipe-desc">Conciliación y reporte auditable</div></div></div></section>',
   '<section class="panel"><div class="panel-head"><div><h2>Reglas de calidad</h2><div class="panel-sub">Fallos detectados por control</div></div><button class="btn btn-small" data-view="quality">Ver todas</button></div>',bars,'</section></div>',
   '<div><section class="panel"><div class="panel-head"><div><h2>Estado del lote</h2><div class="panel-sub">Resultado de la última ejecución</div></div></div>',
-  '<div class="callout ',kind==="fail"?"error":kind==="warn"?"warning":"",""><strong>',esc(c.status.replaceAll("_"," ")),'</strong><span>',esc(c.recommendation),'</span></div>',
+  '<div class="callout ',kind==="fail"?"error":kind==="warn"?"warning":"",'"><strong>',esc(c.status.replaceAll("_"," ")),'</strong><span>',esc(c.recommendation),'</span></div>',
   '<div style="margin-top:15px"><div class="kv"><span>Motor</span><strong>',esc(r.engine.name+" "+r.engine.version),'</strong></div>',
   '<div class="kv"><span>Modo</span><strong>',esc(r.engine.execution_mode+" ("+r.engine.master+")"),'</strong></div>',
   '<div class="kv"><span>Tiempo de ejecución</span><strong>',r.duration_seconds.toFixed(2),' s</strong></div>',
