@@ -1,0 +1,80 @@
+name: FinData · Test Spark SQL and deploy demo
+
+on:
+  push:
+    branches: [findata-mvp]
+    paths:
+      - 'findata/**'
+      - '.github/workflows/findata-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: findata-pages
+  cancel-in-progress: true
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java for Spark
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: findata/backend/requirements.txt
+      - name: Install Python dependencies
+        run: python -m pip install -r findata/backend/requirements.txt
+      - name: Run PySpark SQL pipeline
+        env:
+          FINDATA_DATA_DIR: findata/data
+          SPARK_MASTER: local[2]
+        run: python findata/spark/run_pipeline.py --data-dir findata/data --output findata/site/spark-results.json
+      - name: Run backend tests
+        env:
+          FINDATA_DATA_DIR: findata/data
+          SPARK_MASTER: local[2]
+        run: PYTHONPATH=findata pytest findata/backend/tests -q
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Compile TypeScript
+        run: |
+          npm install --global typescript@5.7.3
+          tsc -p findata/tsconfig.json
+      - name: Assemble GitHub Pages artifact
+        run: |
+          mkdir -p _site/data
+          cp -R findata/site/. _site/
+          cp -R findata/data/. _site/data/
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: validate-and-build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Enable and configure GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

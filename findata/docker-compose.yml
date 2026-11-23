@@ -1,0 +1,23 @@
+services:
+  findata-api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: findata-api
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+  findata-web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: findata-web
+    ports:
+      - "8080:80"
+    depends_on:
+      findata-api:
+        condition: service_healthy
