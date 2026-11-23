@@ -137,7 +137,7 @@ function content():string{
  switch(state.view){case "dashboard":return dashboard();case "sources":return sources();case "mapping":return mapping();case "quality":return quality();case "reconciliation":return reconciliation();case "certification":return certification();}
 }
 function render():void{
- const nav=NAV.map(n=>h('<button class="',state.view===n.id?"active":"",'" data-view="'',n.id,'"><span class="nav-icon">',n.icon,'</span><span>',n.label,'</span></button>')).join("");
+ const nav=NAV.map(n=>h('<button class="',state.view===n.id?"active":"" ,'" data-view="',n.id,'"><span class="nav-icon">',n.icon,'</span><span>',n.label,'</span></button>')).join("");
  root!.innerHTML=h('<div class="shell"><aside class="sidebar"><div class="brand"><div class="brand-mark">FD</div><div><div class="brand-name">FinData</div><div class="brand-sub">Data Engineering Lab</div></div></div>',
  '<div><div class="nav-label">Workspace</div><nav class="nav">',nav,'</nav></div>',
  '<div class="sidebar-bottom"><div class="env-pill"><span class="dot"></span> ',state.reportOrigin==="ci"?"CI report ready":state.reportOrigin==="local"?"Local Spark API":"Awaiting Spark report",'</div><div class="sidebar-note">Financial Data Integration<br>Mapping · Quality · Certification</div></div></aside>',
