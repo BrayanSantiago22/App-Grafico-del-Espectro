@@ -44,7 +44,7 @@ function dashboard():string{
  const bars=q.rules.slice(0,8).map(rule=>{
   const rate=rule.evaluated_records?100*rule.failed_records/rule.evaluated_records:0;
   return h('<div class="bar-row"><span title="',esc(rule.label),'">',esc(rule.label.length>18?rule.label.slice(0,17)+"…":rule.label),
-   '</span><div class="bar-track"><div class="bar-fill ',rule.failed_records?"fail":"","" style="width:",Math.max(rule.failed_records?rate:100,2),'%"></div></div><strong>',
+   '</span><div class="bar-track"><div class="bar-fill ',rule.failed_records?"fail":"",'" style="width:',Math.max(rule.failed_records?rate:100,2),'%"></div></div><strong>',
    rule.failed_records?num(rule.failed_records)+" fallos":"OK",'</strong></div>');
  }).join("");
  return h(heading("Resumen ejecutivo","Vista general del proceso de integración y certificación.",'<button class="btn" data-action="export-json">↓ Descargar reporte</button>'),
@@ -100,7 +100,7 @@ function quality():string{
   badge(r.status,r.status==="PASS"?"pass":r.severity==="ERROR"?"fail":"warn")]);
  return h(heading("Calidad de datos","Reglas de integridad, unicidad, obligatoriedad y dominios permitidos."),
   '<section class="panel"><div class="panel-head"><div><h2>Controles ejecutados</h2><div class="panel-sub">',rules.length,' reglas definidas sobre tres entidades</div></div>',
-  '<select id="quality-filter" class="btn"><option value="ALL" ',state.qualityFilter==="ALL"?"selected":""," >Todas las reglas</option><option value="FAIL" ',state.qualityFilter==="FAIL"?"selected":""," >Con fallos</option><option value="PASS" ',state.qualityFilter==="PASS"?"selected":""," >Aprobadas</option></select></div>',
+  '<select id="quality-filter" class="btn"><option value="ALL" ',state.qualityFilter==="ALL"?"selected":"",'">Todas las reglas</option><option value="FAIL" ',state.qualityFilter==="FAIL"?"selected":"",'">Con fallos</option><option value="PASS" ',state.qualityFilter==="PASS"?"selected":"",'">Aprobadas</option></select></div>',
   rules.length?table(["Regla","Entidad","Severidad","Evaluados","Fallos","Resultado"],rows):'<div class="empty">Ejecuta el pipeline Spark para consultar los controles.</div>','</section>',
   '<div class="callout warning">Un control fallido no siempre significa que todo el lote deba rechazarse. La severidad y las reglas críticas determinan si la certificación puede avanzar o requiere revisión.</div>');
 }
@@ -137,7 +137,7 @@ function content():string{
  switch(state.view){case "dashboard":return dashboard();case "sources":return sources();case "mapping":return mapping();case "quality":return quality();case "reconciliation":return reconciliation();case "certification":return certification();}
 }
 function render():void{
- const nav=NAV.map(n=>h('<button class="',state.view===n.id?"active":"","" data-view="',n.id,'"><span class="nav-icon">',n.icon,'</span><span>',n.label,'</span></button>')).join("");
+ const nav=NAV.map(n=>h('<button class="',state.view===n.id?"active":"",'" data-view="'',n.id,'"><span class="nav-icon">',n.icon,'</span><span>',n.label,'</span></button>')).join("");
  root!.innerHTML=h('<div class="shell"><aside class="sidebar"><div class="brand"><div class="brand-mark">FD</div><div><div class="brand-name">FinData</div><div class="brand-sub">Data Engineering Lab</div></div></div>',
  '<div><div class="nav-label">Workspace</div><nav class="nav">',nav,'</nav></div>',
  '<div class="sidebar-bottom"><div class="env-pill"><span class="dot"></span> ',state.reportOrigin==="ci"?"CI report ready":state.reportOrigin==="local"?"Local Spark API":"Awaiting Spark report",'</div><div class="sidebar-note">Financial Data Integration<br>Mapping · Quality · Certification</div></div></aside>',
